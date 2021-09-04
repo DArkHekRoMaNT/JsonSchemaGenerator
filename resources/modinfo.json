@@ -1,0 +1,12 @@
+{
+  "type": "code",
+  "modid": "jsonschemagenerator",
+  "name": "JsonSchemaGenerator",
+  "authors": ["DArkHekRoMaNT"],
+  "description": "",
+  "version": "0.2.0",
+  "dependencies": {
+    "game": "1.15.0"
+  },
+  "website": "https://github.com/DArkHekRoMaNT/VSModTemplate"
+}

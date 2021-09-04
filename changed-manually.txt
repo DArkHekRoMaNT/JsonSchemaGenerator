@@ -1,0 +1,1 @@
+modinfo.json // fixed dependencies, added "additionalProperties: false" and required, changed modID to modid

@@ -1,0 +1,101 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+
+    <BuildGameVersion>1.15.0</BuildGameVersion>
+    <RunGameVersion>1.15.5</RunGameVersion>
+    <Version>0.2.0</Version>
+
+    <Configurations>Debug;Release;Publish</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup Label="Ingame References">
+    <Reference Include="VintagestoryAPI">
+      <HintPath>$(VINTAGE_STORY)/$(BuildGameVersion)/VintagestoryAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="VSEssentials">
+      <HintPath>$(VINTAGE_STORY)/$(BuildGameVersion)/Mods/VSEssentials.dll</HintPath>
+    </Reference>
+    <Reference Include="VSCreativeMod">
+      <HintPath>$(VINTAGE_STORY)/$(BuildGameVersion)/Mods/VSCreativeMod.dll</HintPath>
+    </Reference>
+    <Reference Include="VSSurvivalMod">
+      <HintPath>$(VINTAGE_STORY)/$(BuildGameVersion)/Mods/VSSurvivalMod.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Label="Nuget Additional References">
+    <PackageReference Include="ILRepack" Version="2.0.18" GeneratePathProperty="true" />
+    <PackageReference Include="NJsonSchema" Version="10.4.6" />
+  </ItemGroup>
+
+  <Target Name="ILRepack" BeforeTargets="PostBuildEvent">
+    <ItemGroup>
+      <ILRepackPackage Include="$(PkgILRepack)/tools/ILRepack.exe" />
+
+      <OutputFile Include="$(TargetPath)" />
+
+      <Targets Include="$(TargetPath)" />
+      <Targets Include="$(TargetDir)NJsonSchema.dll" />
+      <Targets Include="$(TargetDir)Newtonsoft.Json.dll" />
+    </ItemGroup>
+
+    <Message Text="test $(ILRepackPackage)" />
+    <Error Condition="!Exists(@(ILRepackPackage->'%(FullPath)'))" Text="You are trying to use the ILRepack package, but it is not installed or at the correct location" />
+    <Exec Command="@(ILRepackPackage->'%(fullpath)') /out:@(OutputFile) /lib:$(TargetDir) /target:library @(Targets->'%(Identity)', ' ')" />
+  </Target>
+
+  <Target Name="UpdateModinfo" AfterTargets="PostBuildEvent">
+    <ReplaceFileText InputFilename="$(ProjectDir)resources/modinfo.json" MatchExpression='"version": ".*"' ReplacementText='"version": "$(Version)"' />
+    <ReplaceFileText InputFilename="$(ProjectDir)resources/modinfo.json" MatchExpression='"game": ".*"' ReplacementText='"game": "$(BuildGameVersion)"' />
+
+    <!-- TODO: Need a cleaner way to get the version for launch.json -->
+    <ReplaceFileText InputFilename="$(ProjectDir).vscode/settings.json" MatchExpression='"vsversion": ".*"' ReplacementText='"vsversion": "$(RunGameVersion)"' />
+  </Target>
+
+  <Target Name="CollectMod" AfterTargets="UpdateModinfo">
+    <ItemGroup>
+      <!--ModFiles Include="$(ProjectDir)resources/**" /-->
+      <ModFiles Include="$(ProjectDir)resources/modinfo.json" />
+      <ModFiles Include="$(TargetPath)" />
+      <ModFiles Include="$(TargetDir)$(TargetName).pdb" Condition="'$(Configuration)' == 'Debug'" />
+
+
+      <ModFiles Include="$(TargetDir)Namotion.Reflection.dll" />
+    </ItemGroup>
+    <RemoveDir Directories="$(ProjectDir)mods/$(ProjectName)/" />
+    <Copy SourceFiles="@(ModFiles)" DestinationFolder="$(ProjectDir)mods/$(ProjectName)/%(RecursiveDir)" />
+  </Target>
+
+  <Target Name="PublishZip" AfterTargets="CollectMod" Condition="'$(Configuration)' == 'Publish'">
+    <ZipDirectory DestinationFile="$(ProjectDir)releases/$(TargetName)_v$(RunGameVersion)_v$(Version).zip" SourceDirectory="$(ProjectDir)mods/$(TargetName)" Overwrite="true" />
+  </Target>
+
+  <UsingTask TaskName="ReplaceFileText" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <InputFilename ParameterType="System.String" Required="true" />
+      <OutputFilename ParameterType="System.String" Required="false" />
+      <MatchExpression ParameterType="System.String" Required="true" />
+      <ReplacementText ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Text.RegularExpressions" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+            if(string.IsNullOrEmpty(OutputFilename)) OutputFilename = InputFilename;
+            File.WriteAllText(
+                OutputFilename,
+                Regex.Replace(File.ReadAllText(InputFilename), MatchExpression, ReplacementText)
+                );
+          ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+</Project>

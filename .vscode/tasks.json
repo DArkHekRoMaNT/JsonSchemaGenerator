@@ -1,0 +1,35 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build (Debug)",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "silent" },
+      "problemMatcher": "$msCompile",
+      "type": "shell",
+      "command": "dotnet",
+      "linux": { "options": { "env": { "FrameworkPathOverride": "/lib/mono/4.6.1-api/" } } },
+      "args": ["build", "-c", "Debug"]
+    },
+    {
+      "label": "build (Release)",
+      "group": "build",
+      "presentation": { "reveal": "silent" },
+      "problemMatcher": "$msCompile",
+      "type": "shell",
+      "command": "dotnet",
+      "linux": { "options": { "env": { "FrameworkPathOverride": "/lib/mono/4.6.1-api/" } } },
+      "args": ["build", "-c", "Release"]
+    },
+    {
+      "label": "build (Publish)",
+      "group": "build",
+      "presentation": { "reveal": "silent" },
+      "problemMatcher": "$msCompile",
+      "type": "shell",
+      "command": "dotnet",
+      "linux": { "options": { "env": { "FrameworkPathOverride": "/lib/mono/4.6.1-api/" } } },
+      "args": ["build", "-c", "Publish"]
+    }
+  ]
+}
