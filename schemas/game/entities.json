@@ -4220,12 +4220,9 @@
       ],
       "enum": [
         "managed",
-        "managed",
         "native",
         "optil",
         "codeTypeMask",
-        "codeTypeMask",
-        "unmanaged",
         "unmanaged",
         "noInlining",
         "forwardRef",

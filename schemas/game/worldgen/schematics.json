@@ -2173,12 +2173,9 @@
       ],
       "enum": [
         "managed",
-        "managed",
         "native",
         "optil",
         "codeTypeMask",
-        "codeTypeMask",
-        "unmanaged",
         "unmanaged",
         "noInlining",
         "forwardRef",
@@ -7844,7 +7841,6 @@
       "enum": [
         "fragmentShader",
         "vertexShader",
-        "geometryShaderExt",
         "geometryShaderExt",
         "tessEvaluationShader",
         "tessControlShader",
